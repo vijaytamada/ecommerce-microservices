@@ -1,0 +1,54 @@
+# version: "3.9"
+
+# services:
+
+#   postgres-auth:
+#     image: postgres:15
+#     container_name: auth-postgres
+#     environment:
+#       POSTGRES_DB: auth_db
+#       POSTGRES_USER: auth_app
+#       POSTGRES_PASSWORD: auth_app_password
+#     ports:
+#       - "5432:5432"
+
+#   rabbitmq:
+#     image: rabbitmq:3-management
+#     container_name: rabbitmq
+#     ports:
+#       - "5672:5672"
+#       - "15672:15672"
+
+#   eureka-server:
+#     image: eclipse-temurin:17
+#     container_name: eureka-server
+#     volumes:
+#       - ./eureka-server/target/eureka-server-0.0.1-SNAPSHOT.jar:/app/app.jar
+#     command: java -jar /app/app.jar
+#     ports:
+#       - "8761:8761"
+
+#   auth-service:
+#     image: eclipse-temurin:17
+#     container_name: auth-service
+#     depends_on:
+#       - postgres-auth
+#       - rabbitmq
+#       - eureka-server
+#     volumes:
+#       - ./auth-service/target/auth-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+#     command: java -jar /app/app.jar
+#     ports:
+#       - "8081:8081"
+
+#   api-gateway:
+#     image: eclipse-temurin:17
+#     container_name: api-gateway
+#     depends_on:
+#       - eureka-server
+#       - auth-service
+#     volumes:
+#       - ./api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar:/app/app.jar
+#     command: java -jar /app/app.jar
+#     ports:
+#       - "8080:8080"

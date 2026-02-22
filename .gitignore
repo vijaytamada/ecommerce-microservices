@@ -1,0 +1,94 @@
+#################################
+# Java / Maven / Gradle
+#################################
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+#################################
+# Spring Boot
+#################################
+application.yml
+application.properties
+application-*.yml
+!application-example.yml
+!application-example.yaml
+
+#################################
+# Environment / Secrets
+#################################
+.env
+.env.*
+*.key
+*.pem
+*.crt
+secrets/
+config/secrets/
+
+#################################
+# IDE / Editor
+#################################
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/
+build/
+
+#################################
+# OS Files
+#################################
+.DS_Store
+Thumbs.db
+
+#################################
+# Docker
+#################################
+docker-data/
+*.pid
+
+#################################
+# Logs
+#################################
+logs/
+*.log
+
+#################################
+# Test Reports
+#################################
+surefire-reports/
+failsafe-reports/
+
+#################################
+# Cache / Temp
+#################################
+.cache/
+tmp/
+temp/
+
+#################################
+# Node (if frontend added later)
+#################################
+node_modules/
+dist/
+build/
+
+#################################
+# Redis / RabbitMQ Local Data
+#################################
+redis-data/
+rabbitmq-data/

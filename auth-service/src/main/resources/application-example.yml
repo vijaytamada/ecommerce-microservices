@@ -1,0 +1,54 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/<DB NAME>
+    username: <ROLE NAME>
+    password: <ROLE PASSWORD>
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    publisher-returns: true
+    publisher-confirm-type: correlated
+
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 587
+    username: <MAILTRAP USERNAME>
+    password: <MAILTRAP PASSWORD>
+    from: no-reply@auth.ecommerce.dev
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: THIS_IS_A_SUPER_LONG_SECRET_KEY_CHANGE_IT
+  access-expiry-minutes: 15
+  refresh-expiry-days: 30
+
+app:
+  reset-password:
+    base-url: http://localhost:3000/reset-password
+  mail:
+    app-name: E-Commerce
