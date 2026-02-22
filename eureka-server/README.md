@@ -59,10 +59,29 @@ If a service goes down:
 - Maven 3.8+
 
 #### Start the Server
-From inside the ```eureka-server``` folder:
-```shell
+
+You can start the Eureka Server using any of the following methods:
+
+#### ▶ Option 1: Using IntelliJ IDEA
+
+1. Open the `eureka-server` project in IntelliJ.
+2. Open the main application class.
+3. Right-click on the class.
+4. Click **Run**.
+
+The server will start on:
+```
+http://localhost:8761
+```
+
+#### ▶ Option 2: Using Maven Command
+
+From inside the `eureka-server` folder, run:
+
+```bash
 mvn spring-boot:run
 ```
+
 Once started, open:
 ```
 http://localhost:8761

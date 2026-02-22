@@ -126,15 +126,31 @@ Flow:
 #### Next Steps
 - Start Redis
 - Start Eureka Server
-- Finally start API Gateway 
+- Finally start API Gateway
 
-```shell
-cd api-gateway
+You can start the api-gateway server using any of the following methods:
+
+#### ▶ Option 1: Using IntelliJ IDEA
+
+1. Open the `api-gateway` project in IntelliJ.
+2. Open the main application class.
+3. Right-click on the class.
+4. Click **Run**.
+
+The server will start on:
+```
+http://localhost:8080
+```
+
+#### ▶ Option 2: Using Maven Command
+
+From inside the `eureka-server` folder, run:
+
+```bash
 mvn spring-boot:run
 ```
 
 Gateway runs on:
-```shell
+```
 http://localhost:8080
 ```
-
