@@ -47,7 +47,8 @@ Service  Service    Service      Service
 
 ## ⚙️ Configuration
 
-```application.yml```
+```application.yml```  
+Use ```application-example.yml``` as a template.
 ```yaml
 server:
   port: 8080

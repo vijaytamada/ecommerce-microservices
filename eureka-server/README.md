@@ -22,7 +22,8 @@ All services registers themselves with Eureka for synchronous operations and for
 
 ## ⚙️ Configuration
 
-```application.yml```
+```application.yml```  
+Use ```application-example.yml``` as a template.
 
 ```yaml
 server:
