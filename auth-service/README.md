@@ -143,7 +143,7 @@ http://localhost:8081/v3/api-docs
 | DELETE | `/api/admin/users/{id}`              | Delete user |
 
 
-#### 🚀 Start the Service
+## 🚀 Start the Service
 
 You can start the Auth Service using any of the following methods:
 
