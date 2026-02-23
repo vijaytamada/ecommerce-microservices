@@ -133,14 +133,14 @@ http://localhost:8081/v3/api-docs
 #### 👮 Admin APIs
 
 | Method | Endpoint                             | Description |
-| ------ | ------------------------------------ | ----------- |
-| POST   | `/api/admin/roles/{role}`            | Create role |
-| POST   | `/api/admin/users/{id}/roles/{role}` | Assign role |
-| DELETE | `/api/admin/users/{id}/roles/{role}` | Remove role |
-| POST   | `/api/admin/users/{id}/block`        | Block user  |
-| POST   | `/api/admin/users/{id}/enable`       | Enable user |
-| GET    | `/api/admin/users`                   | View users  |
-| DELETE | `/api/admin/users/{id}`              | Delete user |
+| ------ |--------------------------------------| ----------- |
+| POST   | `/api/auth/admin/roles/{role}`       | Create role |
+| POST   | `/api/auth/admin/users/{id}/roles/{role}` | Assign role |
+| DELETE | `/api/auth/admin/users/{id}/roles/{role}` | Remove role |
+| POST   | `/api/auth/admin/users/{id}/block`        | Block user  |
+| POST   | `/api/auth/admin/users/{id}/enable`       | Enable user |
+| GET    | `/api/auth/admin/users`                   | View users  |
+| DELETE | `/api/auth/admin/users/{id}`              | Delete user |
 
 
 ## 🚀 Start the Service

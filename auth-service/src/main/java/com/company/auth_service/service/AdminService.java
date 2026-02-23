@@ -1,14 +1,14 @@
 package com.company.auth_service.service;
 
 import com.company.auth_service.dto.response.ApiResponse;
+import com.company.auth_service.dto.response.UserResponse;
 import com.company.auth_service.entity.Role;
-import com.company.auth_service.entity.User;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface AdminService {
-    List<User> viewAllUsers();
+    List<UserResponse> viewAllUsers();
 
     void blockUser(UUID userId);
 

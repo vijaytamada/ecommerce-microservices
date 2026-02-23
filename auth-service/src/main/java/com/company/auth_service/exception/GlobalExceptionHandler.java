@@ -80,6 +80,18 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Object>> handleResourceExists(
+            ResourceAlreadyExistsException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT) // 409
+                .body(ApiResponse.error(
+                        "Invalid token",
+                        ex.getMessage()
+                ));
+    }
+
 
     /* ---------- All Other Errors ---------- */
 

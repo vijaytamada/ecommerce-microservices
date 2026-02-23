@@ -1,6 +1,7 @@
 package com.company.auth_service.controller;
 
 import com.company.auth_service.dto.response.ApiResponse;
+import com.company.auth_service.dto.response.UserResponse;
 import com.company.auth_service.entity.Role;
 import com.company.auth_service.entity.User;
 import com.company.auth_service.service.AdminService;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/auth/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
@@ -25,9 +26,9 @@ public class AdminController {
 
     /* Get All Users */
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<List<User>>> viewAllUsers() {
+    public ResponseEntity<ApiResponse<List<UserResponse>>> viewAllUsers() {
 
-        List<User> users = adminService.viewAllUsers();
+        List<UserResponse> users = adminService.viewAllUsers();
 
         return ResponseEntity.ok(
                 ApiResponse.success("Fetched all users", users)

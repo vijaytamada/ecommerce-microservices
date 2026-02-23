@@ -1,7 +1,9 @@
 package com.company.auth_service.service.impl;
 
+import com.company.auth_service.dto.response.UserResponse;
 import com.company.auth_service.entity.Role;
 import com.company.auth_service.entity.User;
+import com.company.auth_service.exception.ResourceAlreadyExistsException;
 import com.company.auth_service.exception.ResourceNotFoundException;
 import com.company.auth_service.exception.AuthException;
 import com.company.auth_service.repository.RoleRepository;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -25,9 +28,12 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
-    public List<User> viewAllUsers() {
+    public List<UserResponse> viewAllUsers() {
 
-        return userRepo.findAll();
+        return userRepo.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
 
@@ -102,7 +108,7 @@ public class AdminServiceImpl implements AdminService {
     public Role createRole(String roleName) {
 
         if (roleRepo.existsByName(roleName)) {
-            throw new AuthException("Role already exists");
+            throw new ResourceAlreadyExistsException("Already role assigned!");
         }
 
         Role role = Role.builder()
@@ -110,5 +116,22 @@ public class AdminServiceImpl implements AdminService {
                 .build();
 
         return roleRepo.save(role);
+    }
+
+    // Mappers
+    private UserResponse mapToDTO(User user) {
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .enabled(user.getEnabled())
+                .emailVerified(user.getEmailVerified())
+                .roles(
+                        user.getRoles()
+                                .stream()
+                                .map(Role::getName)
+                                .collect(Collectors.toSet())
+                )
+                .build();
     }
 }
