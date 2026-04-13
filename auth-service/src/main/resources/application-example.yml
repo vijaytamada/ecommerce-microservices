@@ -16,24 +16,6 @@ spring:
       ddl-auto: update
     show-sql: false
 
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-    publisher-returns: true
-    publisher-confirm-type: correlated
-
-  mail:
-    host: sandbox.smtp.mailtrap.io
-    port: 587
-    username: <MAILTRAP USERNAME>
-    password: <MAILTRAP PASSWORD>
-    from: no-reply@auth.ecommerce.dev
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-
 eureka:
   client:
     service-url:

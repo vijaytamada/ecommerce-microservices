@@ -1,54 +1,286 @@
-# version: "3.9"
+version: "3.9"
 
-# services:
+services:
 
-#   postgres-auth:
-#     image: postgres:15
-#     container_name: auth-postgres
-#     environment:
-#       POSTGRES_DB: auth_db
-#       POSTGRES_USER: auth_app
-#       POSTGRES_PASSWORD: auth_app_password
-#     ports:
-#       - "5432:5432"
+  # ─────────────────────────────────────────────────────────
+  #  INFRASTRUCTURE
+  # ─────────────────────────────────────────────────────────
 
-#   rabbitmq:
-#     image: rabbitmq:3-management
-#     container_name: rabbitmq
-#     ports:
-#       - "5672:5672"
-#       - "15672:15672"
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"   # Management UI → http://localhost:15672  (guest/guest)
 
-#   eureka-server:
-#     image: eclipse-temurin:17
-#     container_name: eureka-server
-#     volumes:
-#       - ./eureka-server/target/eureka-server-0.0.1-SNAPSHOT.jar:/app/app.jar
-#     command: java -jar /app/app.jar
-#     ports:
-#       - "8761:8761"
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
 
-#   auth-service:
-#     image: eclipse-temurin:17
-#     container_name: auth-service
-#     depends_on:
-#       - postgres-auth
-#       - rabbitmq
-#       - eureka-server
-#     volumes:
-#       - ./auth-service/target/auth-service-0.0.1-SNAPSHOT.jar:/app/app.jar
-#     command: java -jar /app/app.jar
-#     ports:
-#       - "8081:8081"
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
 
-#   api-gateway:
-#     image: eclipse-temurin:17
-#     container_name: api-gateway
-#     depends_on:
-#       - eureka-server
-#       - auth-service
-#     volumes:
-#       - ./api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar:/app/app.jar
-#     command: java -jar /app/app.jar
-#     ports:
-#       - "8080:8080"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  # ─────────────────────────────────────────────────────────
+  #  POSTGRESQL DATABASES (one per service)
+  # ─────────────────────────────────────────────────────────
+
+  postgres-auth:
+    image: postgres:15
+    container_name: postgres-auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_app
+      POSTGRES_PASSWORD: auth_app_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_auth:/var/lib/postgresql/data
+
+  postgres-user:
+    image: postgres:15
+    container_name: postgres-user
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: user_app
+      POSTGRES_PASSWORD: user_app_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_user:/var/lib/postgresql/data
+
+  postgres-inventory:
+    image: postgres:15
+    container_name: postgres-inventory
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: inventory_app
+      POSTGRES_PASSWORD: inventory_app_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_inventory:/var/lib/postgresql/data
+
+  postgres-order:
+    image: postgres:15
+    container_name: postgres-order
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order_app
+      POSTGRES_PASSWORD: order_app_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - pg_order:/var/lib/postgresql/data
+
+  postgres-payment:
+    image: postgres:15
+    container_name: postgres-payment
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: payment_app
+      POSTGRES_PASSWORD: payment_app_password
+    ports:
+      - "5436:5432"
+    volumes:
+      - pg_payment:/var/lib/postgresql/data
+
+  postgres-shipping:
+    image: postgres:15
+    container_name: postgres-shipping
+    environment:
+      POSTGRES_DB: shipping_db
+      POSTGRES_USER: shipping_app
+      POSTGRES_PASSWORD: shipping_app_password
+    ports:
+      - "5437:5432"
+    volumes:
+      - pg_shipping:/var/lib/postgresql/data
+
+  # ─────────────────────────────────────────────────────────
+  #  MICROSERVICES
+  # ─────────────────────────────────────────────────────────
+
+  eureka-server:
+    image: eclipse-temurin:17
+    container_name: eureka-server
+    depends_on: []
+    volumes:
+      - ./eureka-server/target/eureka-server-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    image: eclipse-temurin:17
+    container_name: api-gateway
+    depends_on:
+      - eureka-server
+      - redis
+    volumes:
+      - ./api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8080:8080"
+
+  auth-service:
+    image: eclipse-temurin:17
+    container_name: auth-service
+    depends_on:
+      - postgres-auth
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./auth-service/target/auth-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8081:8081"
+
+  user-service:
+    image: eclipse-temurin:17
+    container_name: user-service
+    depends_on:
+      - postgres-user
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./user-service/target/user-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8082:8082"
+
+  product-service:
+    image: eclipse-temurin:17
+    container_name: product-service
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./product-service/target/product-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8083:8083"
+
+  inventory-service:
+    image: eclipse-temurin:17
+    container_name: inventory-service
+    depends_on:
+      - postgres-inventory
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./inventory-service/target/inventory-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8084:8084"
+
+  order-service:
+    image: eclipse-temurin:17
+    container_name: order-service
+    depends_on:
+      - postgres-order
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./order-service/target/order-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8085:8085"
+
+  payment-service:
+    image: eclipse-temurin:17
+    container_name: payment-service
+    depends_on:
+      - postgres-payment
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./payment-service/target/payment-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8086:8086"
+
+  review-service:
+    image: eclipse-temurin:17
+    container_name: review-service
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./review-service/target/review-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8087:8087"
+
+  search-service:
+    image: eclipse-temurin:17
+    container_name: search-service
+    depends_on:
+      - elasticsearch
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./search-service/target/search-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8088:8088"
+
+  shipping-service:
+    image: eclipse-temurin:17
+    container_name: shipping-service
+    depends_on:
+      - postgres-shipping
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./shipping-service/target/shipping-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8089:8089"
+
+  notification-service:
+    image: eclipse-temurin:17
+    container_name: notification-service
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - eureka-server
+    volumes:
+      - ./notification-service/target/notification-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "8090:8090"
+
+# ─────────────────────────────────────────────────────────
+#  VOLUMES
+# ─────────────────────────────────────────────────────────
+
+volumes:
+  pg_auth:
+  pg_user:
+  pg_inventory:
+  pg_order:
+  pg_payment:
+  pg_shipping:
+  mongo_data:
+  es_data:
