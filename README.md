@@ -60,6 +60,7 @@ The platform follows a microservices-based architecture with:
 
 #### External Integrations
 - Mailtrap SMTP (Email Notifications)
+- iThink Logistics API v3 (Shipment creation, AWB assignment, tracking)
 
 #### DevOps & Tools
 - Git & GitHub
