@@ -29,9 +29,12 @@ eureka:
   instance:
     prefer-ip-address: true
 
-shiprocket:
-  email: <SHIPROCKET_EMAIL>
-  password: <SHIPROCKET_PASSWORD>
-  base-url: https://apiv2.shiprocket.in/v1/external
-  # Set simulate: true to skip real ShipRocket calls (uses auto-generated tracking numbers)
+ithink:
+  base-url: https://my.ithinklogistics.com
+  access-token: <ITHINK_ACCESS_TOKEN>
+  secret-key: <ITHINK_SECRET_KEY>
+  pickup-address-id: <PICKUP_ADDRESS_ID>
+  return-address-id: <RETURN_ADDRESS_ID>
+  warehouse-pincode: "<WAREHOUSE_PINCODE>"
+  # Set simulate: true to skip real iThink API calls (uses auto-generated AWB numbers)
   simulate: true

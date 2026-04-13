@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +21,22 @@ import java.util.UUID;
 public class ShippingController {
 
     private final ShippingService shippingService;
+
+    // ─── Public ───────────────────────────────────────────────────────────────
+
+    @GetMapping("/check-pincode")
+    @Operation(summary = "Check if a pincode is serviceable (public)")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> checkPincode(@RequestParam String pincode) {
+        return ResponseEntity.ok(ApiResponse.success("Pincode checked", shippingService.checkPincode(pincode)));
+    }
+
+    @GetMapping("/track/{awb}")
+    @Operation(summary = "Track shipment by AWB number (public)")
+    public ResponseEntity<ApiResponse<ShipmentResponse>> trackByAwb(@PathVariable String awb) {
+        return ResponseEntity.ok(ApiResponse.success("Shipment tracked", shippingService.trackByNumber(awb)));
+    }
+
+    // ─── Customer ─────────────────────────────────────────────────────────────
 
     @GetMapping("/order/{orderId}")
     @Operation(summary = "Get shipment for an order")
@@ -32,16 +50,44 @@ public class ShippingController {
         return ResponseEntity.ok(ApiResponse.success("Shipment fetched", shippingService.getShipment(id)));
     }
 
-    @GetMapping("/track/{trackingNumber}")
-    @Operation(summary = "Track shipment by tracking number (public)")
-    public ResponseEntity<ApiResponse<ShipmentResponse>> track(@PathVariable String trackingNumber) {
-        return ResponseEntity.ok(ApiResponse.success("Shipment tracked", shippingService.trackByNumber(trackingNumber)));
+    // ─── Admin ────────────────────────────────────────────────────────────────
+
+    @PostMapping
+    @Operation(summary = "Push a confirmed order to iThink and assign AWB (ADMIN)")
+    public ResponseEntity<ApiResponse<ShipmentResponse>> createOnIthink(@RequestParam UUID orderId) {
+        return ResponseEntity.ok(ApiResponse.success("Shipment created on iThink", shippingService.createShipmentOnIthink(orderId)));
+    }
+
+    @PostMapping("/{id}/track")
+    @Operation(summary = "Force-sync latest tracking from iThink (ADMIN)")
+    public ResponseEntity<ApiResponse<ShipmentResponse>> syncTracking(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Tracking synced", shippingService.syncTracking(id)));
+    }
+
+    @PostMapping("/{id}/cancel")
+    @Operation(summary = "Cancel shipment on iThink (ADMIN)")
+    public ResponseEntity<ApiResponse<ShipmentResponse>> cancel(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Shipment cancelled", shippingService.cancelShipmentOnIthink(id)));
+    }
+
+    @PostMapping("/{id}/documents")
+    @Operation(summary = "Re-fetch label and manifest PDF URLs from iThink (ADMIN)")
+    public ResponseEntity<ApiResponse<ShipmentResponse>> generateDocuments(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Documents generated", shippingService.generateDocuments(id)));
     }
 
     @PatchMapping("/{id}/status")
-    @Operation(summary = "Update shipment status (ADMIN)")
+    @Operation(summary = "Manually update shipment status (ADMIN)")
     public ResponseEntity<ApiResponse<ShipmentResponse>> updateStatus(
             @PathVariable UUID id, @RequestParam ShipmentStatus status) {
         return ResponseEntity.ok(ApiResponse.success("Status updated", shippingService.updateStatus(id, status)));
+    }
+
+    // ─── Internal / Cron ──────────────────────────────────────────────────────
+
+    @PostMapping("/poll/sync")
+    @Operation(summary = "Poll all due shipments and sync tracking from iThink (INTERNAL/CRON)")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> pollSync() {
+        return ResponseEntity.ok(ApiResponse.success("Poll completed", shippingService.pollDueShipments()));
     }
 }

@@ -25,13 +25,47 @@ public class Shipment {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "carrier", length = 50)
+    // ── iThink fields ─────────────────────────────────────────────────────────
+
+    /** AWB (Air Waybill) number assigned by iThink. Also serves as the tracking number. */
+    @Column(name = "awb", unique = true)
+    private String awb;
+
+    /** Courier / logistics provider name returned by iThink (e.g. "Delhivery"). */
+    @Column(name = "courier_name", length = 100)
+    private String courierName;
+
+    /** iThink internal reference number (refnum). */
+    @Column(name = "provider_ref", length = 100)
+    private String providerRef;
+
+    /** Shipping label PDF URL returned by iThink. */
+    @Column(name = "label_url", columnDefinition = "TEXT")
+    private String labelUrl;
+
+    /** Manifest PDF URL returned by iThink. */
+    @Column(name = "manifest_url", columnDefinition = "TEXT")
+    private String manifestUrl;
+
+    /**
+     * Raw current_status string from iThink (e.g. "Picked Up", "Delivered", "RTO Pending").
+     * Stored as-is — no mapping applied.
+     */
+    @Column(name = "ithink_status", length = 100)
     @Builder.Default
-    private String carrier = "LOCAL_COURIER";
+    private String ithinkStatus = "Manifested";
 
-    @Column(name = "tracking_number", unique = true)
-    private String trackingNumber;
+    /** When we last polled iThink for tracking updates. */
+    @Column(name = "last_synced_at")
+    private LocalDateTime lastSyncedAt;
 
+    /** When to next poll iThink (set to now + 2h after each sync). */
+    @Column(name = "next_sync_at")
+    private LocalDateTime nextSyncAt;
+
+    // ── Core fields ───────────────────────────────────────────────────────────
+
+    /** Internal status enum for the order lifecycle. */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @Builder.Default
@@ -43,6 +77,7 @@ public class Shipment {
     @Column(name = "actual_delivery")
     private LocalDate actualDelivery;
 
+    /** Snapshot of the shipping address JSON at order time. */
     @Column(name = "shipping_address", columnDefinition = "TEXT")
     private String shippingAddress;
 
@@ -57,7 +92,17 @@ public class Shipment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // ── Status enum ───────────────────────────────────────────────────────────
+
     public enum ShipmentStatus {
-        PROCESSING, DISPATCHED, IN_TRANSIT, OUT_FOR_DELIVERY, DELIVERED, FAILED
+        PROCESSING,         // Shipment record created, awaiting iThink AWB assignment
+        MANIFESTED,         // AWB assigned, label generated
+        DISPATCHED,         // Picked up by courier
+        IN_TRANSIT,         // Moving between hubs
+        OUT_FOR_DELIVERY,   // Last-mile delivery
+        DELIVERED,          // Successfully delivered
+        RTO,                // Return to origin initiated
+        FAILED,             // Delivery failed / cancelled
+        CANCELLED
     }
 }
