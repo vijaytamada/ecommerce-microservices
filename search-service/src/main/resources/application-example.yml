@@ -1,0 +1,22 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: search-service
+
+  elasticsearch:
+    uris: http://localhost:9200
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true

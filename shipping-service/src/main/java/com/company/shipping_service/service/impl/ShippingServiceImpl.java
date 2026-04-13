@@ -12,6 +12,7 @@ import com.company.shipping_service.service.ShippingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,12 @@ public class ShippingServiceImpl implements ShippingService {
     private final ShipmentRepository shipmentRepository;
     private final RabbitTemplate rabbitTemplate;
 
+    @Value("${shiprocket.simulate:true}")
+    private boolean simulate;
+
+    @Value("${shiprocket.base-url:https://apiv2.shiprocket.in/v1/external}")
+    private String shiprocketBaseUrl;
+
     @Override
     @Transactional
     public ShipmentResponse createShipment(Map<String, Object> orderEvent) {
@@ -37,7 +44,12 @@ public class ShippingServiceImpl implements ShippingService {
         UUID userId  = UUID.fromString((String) orderEvent.get("userId"));
         String address = (String) orderEvent.getOrDefault("shippingAddress", "{}");
 
-        String trackingNumber = "TRK-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
+        // When simulate=true: auto-generate tracking number (no real ShipRocket calls)
+        // When simulate=false: call ShipRocket API at shiprocketBaseUrl to create a real shipment order
+        String trackingNumber = simulate
+                ? "TRK-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase()
+                : callShipRocket(orderId, address);
+        log.info("Shipment mode: {}", simulate ? "SIMULATED" : "SHIPROCKET (" + shiprocketBaseUrl + ")");
 
         TrackingEvent initial = TrackingEvent.builder()
                 .status("PROCESSING")
@@ -123,6 +135,19 @@ public class ShippingServiceImpl implements ShippingService {
         }
 
         return toResponse(shipment);
+    }
+
+    /**
+     * Stub for real ShipRocket integration.
+     * To implement: POST to shiprocketBaseUrl/orders/create/adhoc with JWT auth token.
+     * Login: POST /auth/login with email+password → get token → use as Bearer.
+     * Set shiprocket.simulate=false in application.yml to activate.
+     */
+    private String callShipRocket(UUID orderId, String address) {
+        // TODO: Use RestTemplate/WebClient to:
+        // 1. POST /auth/login → get token
+        // 2. POST /orders/create/adhoc → get shipment_id + awb_code (tracking number)
+        throw new UnsupportedOperationException("Real ShipRocket integration not yet implemented. Set shiprocket.simulate=true");
     }
 
     /* ---- Helpers ---- */

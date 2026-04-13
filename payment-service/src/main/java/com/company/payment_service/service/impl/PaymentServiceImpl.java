@@ -11,6 +11,7 @@ import com.company.payment_service.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,12 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final RabbitTemplate rabbitTemplate;
 
+    @Value("${razorpay.simulate:true}")
+    private boolean simulate;
+
+    @Value("${razorpay.key-id:}")
+    private String razorpayKeyId;
+
     @Override
     @Transactional
     public PaymentResponse processPayment(Map<String, Object> orderEvent) {
@@ -37,8 +44,10 @@ public class PaymentServiceImpl implements PaymentService {
         String email  = (String) orderEvent.get("userEmail");
         BigDecimal amt = new BigDecimal(orderEvent.get("totalAmount").toString());
 
-        // Simulate payment: 90% success rate
-        boolean success = Math.random() > 0.1;
+        // When simulate=true: 90% success rate (no real Razorpay calls)
+        // When simulate=false: integrate with Razorpay using razorpayKeyId / key-secret
+        boolean success = simulate ? Math.random() > 0.1 : callRazorpay(amt);
+        log.info("Payment mode: {}", simulate ? "SIMULATED" : "RAZORPAY (key=" + razorpayKeyId + ")");
 
         Payment payment = Payment.builder()
                 .orderId(orderId)
@@ -114,6 +123,20 @@ public class PaymentServiceImpl implements PaymentService {
         rabbitTemplate.convertAndSend(RabbitMQConfig.PAYMENT_EXCHANGE, RabbitMQConfig.PAYMENT_REFUNDED_KEY, event);
 
         return toResponse(payment);
+    }
+
+    /**
+     * Stub for real Razorpay integration.
+     * To implement: use Razorpay Java SDK with razorpay.key-id and razorpay.key-secret
+     * from application.yml (set simulate: false to activate).
+     */
+    private boolean callRazorpay(BigDecimal amount) {
+        // TODO: integrate com.razorpay:razorpay-java SDK
+        // RazorpayClient client = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+        // JSONObject orderRequest = new JSONObject(); orderRequest.put("amount", amount.multiply(BigDecimal.valueOf(100)).intValue());
+        // Order order = client.orders.create(orderRequest);
+        // return "created".equals(order.get("status"));
+        throw new UnsupportedOperationException("Real Razorpay integration not yet implemented. Set razorpay.simulate=true");
     }
 
     private PaymentResponse toResponse(Payment p) {
