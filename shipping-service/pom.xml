@@ -12,7 +12,7 @@
 	<artifactId>shipping-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>shipping-service</name>
-	<description>Shipping & Logistics Service - Ecommerce Platform</description>
+	<description>Shipping &amp; Logistics Service - Ecommerce Platform</description>
 	<properties>
 		<java.version>17</java.version>
 		<spring-cloud.version>2025.0.1</spring-cloud.version>
