@@ -1,5 +1,3 @@
-version: "3.9"
-
 # All services communicate over this bridge network.
 # Each container is reachable by its service name as a hostname.
 networks:
