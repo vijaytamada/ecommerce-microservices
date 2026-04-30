@@ -2,10 +2,8 @@ package com.company.shipping_service.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 @Data
-@Component
 @ConfigurationProperties(prefix = "ithink")
 public class IThinkProperties {
 
